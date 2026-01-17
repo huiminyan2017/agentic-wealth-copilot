@@ -1,0 +1,13 @@
+{
+  "year": 2025,
+  "employer_name": "Microsoft Corporation",
+  "wages": 222806.28,
+  "federal_tax_withheld": 38815.75,
+  "ss_wages": 176100.0,
+  "ss_tax_withheld": 10918.2,
+  "medicare_wages": 242121.31,
+  "medicare_tax_withheld": 3889.85,
+  "state_wages": 138808.0,
+  "state_tax_withheld": null,
+  "notes": "Sanitized from user W‑2; values approximated; state tax not available."
+}

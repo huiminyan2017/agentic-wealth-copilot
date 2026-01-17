@@ -1,0 +1,21 @@
+{
+  "pay_date": "2026-01-15",
+  "employer_name": "Microsoft Corporation",
+  "gross_pay": 6719.96,
+  "pre_tax_deductions": 2432.65,
+  "post_tax_deductions": 1496.11,
+  "taxable_wages": 4415.61,
+  "federal_tax": 515.89,
+  "ss_tax": 398.76,
+  "medicare_tax": 93.26,
+  "state_tax": 193.88,
+  "other_taxes": 0.0,
+  "net_pay": 4556.66,
+  "ytd_gross": 6719.96,
+  "ytd_taxable_wages": 4415.61,
+  "ytd_federal_tax": 515.89,
+  "ytd_state_tax": 193.88,
+  "ytd_ss_tax": 398.76,
+  "ytd_medicare_tax": 93.26,
+  "notes": "Sanitized from user paystub; pre/post‑tax deductions aggregated and values approximated."
+}
