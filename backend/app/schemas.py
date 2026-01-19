@@ -7,9 +7,9 @@ expanded as additional features are implemented.
 
 from __future__ import annotations
 
-from typing import List
 from datetime import date
 from pydantic import BaseModel, Field
+from typing import Optional, List
 
 
 class CopilotRequest(BaseModel):
@@ -43,17 +43,25 @@ class W2Record(BaseModel):
     sanitization details or extraction warnings.
     """
 
-    year: int = Field(..., description="Tax year reported on the W‑2")
+    year: int = Field(..., description="Tax year reported on the W-2")
     employer_name: str = Field(..., description="Name of the employer (sanitized)")
-    wages: float = Field(..., description="Box 1 – Wages, tips, other compensation")
-    federal_tax_withheld: float = Field(..., description="Box 2 – Federal income tax withheld")
-    ss_wages: float = Field(..., description="Box 3 – Social Security wages")
-    ss_tax_withheld: float = Field(..., description="Box 4 – Social Security tax withheld")
-    medicare_wages: float = Field(..., description="Box 5 – Medicare wages and tips")
-    medicare_tax_withheld: float = Field(..., description="Box 6 – Medicare tax withheld")
-    state_wages: float | None = Field(None, description="Box 16 – State wages, tips, etc.")
-    state_tax_withheld: float | None = Field(None, description="Box 17 – State income tax")
-    notes: str | None = Field(None, description="Additional contextual information")
+
+    wages: Optional[float] = None
+    federal_tax_withheld: Optional[float] = None
+    ss_wages: Optional[float] = None
+    ss_tax_withheld: Optional[float] = None
+    medicare_wages: Optional[float] = None
+    medicare_tax_withheld: Optional[float] = None
+
+    state_wages: Optional[float] = None
+    state_tax_withheld: Optional[float] = None
+
+    missing_fields: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    extracted_text_path: Optional[str] = None
+    source_pdf_relpath: Optional[str] = None
+
+    notes: Optional[str] = None
 
 
 class PaystubRecord(BaseModel):
@@ -68,20 +76,35 @@ class PaystubRecord(BaseModel):
 
     pay_date: date = Field(..., description="Date of the pay period")
     employer_name: str = Field(..., description="Name of the employer (sanitized)")
-    gross_pay: float = Field(..., description="Total earnings for the period")
-    pre_tax_deductions: float = Field(..., description="Sum of pre‑tax deductions")
-    post_tax_deductions: float = Field(..., description="Sum of post‑tax deductions")
-    taxable_wages: float = Field(..., description="Wages subject to income tax after pre‑tax deductions")
-    federal_tax: float = Field(..., description="Federal income tax withheld for the period")
-    ss_tax: float = Field(..., description="Social Security tax withheld for the period")
-    medicare_tax: float = Field(..., description="Medicare tax withheld for the period")
-    state_tax: float = Field(..., description="State income tax withheld for the period")
-    other_taxes: float = Field(..., description="Any other taxes (e.g. local, SDI)")
-    net_pay: float = Field(..., description="Take‑home pay after all deductions and taxes")
-    ytd_gross: float = Field(..., description="Year‑to‑date gross pay")
-    ytd_taxable_wages: float = Field(..., description="Year‑to‑date taxable wages")
-    ytd_federal_tax: float = Field(..., description="Year‑to‑date federal tax")
-    ytd_state_tax: float = Field(..., description="Year‑to‑date state tax")
-    ytd_ss_tax: float = Field(..., description="Year‑to‑date Social Security tax")
-    ytd_medicare_tax: float = Field(..., description="Year‑to‑date Medicare tax")
-    notes: str | None = Field(None, description="Additional contextual information")
+
+    gross_pay: Optional[float] = None
+    pre_tax_deductions: Optional[float] = None
+    post_tax_deductions: Optional[float] = None
+    taxable_wages: Optional[float] = None
+
+    federal_tax: Optional[float] = None
+    ss_tax: Optional[float] = None
+    medicare_tax: Optional[float] = None
+    state_tax: Optional[float] = None
+    other_taxes: Optional[float] = None
+
+    net_pay: Optional[float] = None
+
+    ytd_gross: Optional[float] = None
+    ytd_taxable_wages: Optional[float] = None
+    ytd_federal_tax: Optional[float] = None
+    ytd_state_tax: Optional[float] = None
+    ytd_ss_tax: Optional[float] = None
+    ytd_medicare_tax: Optional[float] = None
+
+    # quality + debug
+    missing_fields: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+    extracted_text_path: Optional[str] = None
+    source_pdf_relpath: Optional[str] = None
+
+    notes: Optional[str] = None
+
+# Required for Pydantic v2 when using Optional/forward refs
+PaystubRecord.model_rebuild()
+W2Record.model_rebuild()

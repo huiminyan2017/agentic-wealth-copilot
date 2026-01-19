@@ -1,4 +1,4 @@
-"""Application settings for Agentic Wealth Copilot.
+"""Application settings for Agentic Wealth Copilot.
 
 This module centralises configuration for the backend.  It relies on
 ``pydantic-settings`` to read environment variables from a ``.env`` file

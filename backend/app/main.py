@@ -8,11 +8,13 @@ and production.
 """
 
 from fastapi import FastAPI
-
-from backend.app.logging_conf import configure_logging
+from dotenv import load_dotenv
+from backend.app.logging import configure_logging
 from backend.app.services.storage import ensure_dirs
 from backend.app.routes.health import router as health_router
 from backend.app.routes.copilot import router as copilot_router
+from backend.app.routes.income import router as income_router
+from backend.app.routes.analytics_income import router as income_analytics_router
 
 
 def create_app() -> FastAPI:
@@ -21,11 +23,14 @@ def create_app() -> FastAPI:
     The application sets up logging, ensures data directories exist, and
     registers routers for health and copilot endpoints.
     """
+    load_dotenv()
     configure_logging()
     ensure_dirs()
     app = FastAPI(title="Agentic Wealth Copilot API", version="0.1.0")
 
     # Register routes
+    app.include_router(income_router, prefix="/api", tags=["income-tax"])
+    app.include_router(income_analytics_router, prefix="/api", tags=["income-analytics"])
     app.include_router(health_router, tags=["health"])
     app.include_router(copilot_router, prefix="/api", tags=["copilot"])
 

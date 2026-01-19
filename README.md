@@ -59,11 +59,78 @@ See `ARCHITECTURE.md` for more detail on how these pieces fit together.
 
 ---
 
-## Status
+## Running Agentic Wealth Copilot Locally
 
-🚧 **Early design and scaffolding phase.**  The core modules, agents and UI skeletons are being defined.  Functionality will be added incrementally according to the roadmap.
+This project requires Python 3.10+. macOS ships with Python 3.9, which is not compatible with modern typing and AI tooling.
+### 1. Check Your Python Version
+python3 --version
+which python3
+if you see:
+Python 3.9.x
+/usr/bin/python3
+You must install a newer Python.
 
----
+### 2. Install Latest Python (macOS)
+If you don’t have Homebrew:
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+Then install Python:
+    brew install python
+Verify:
+    python3 --version
+    which python3 
+    you should see:
+        Python 3.11.x or 3.12.x
+        /opt/homebrew/bin/python3
+
+### 3. Create Virtual Environment
+From the project root:
+    cd agentic-wealth-copilot
+    rm -rf .venv
+    python3 -m venv .venv
+    source .venv/bin/activate
+Verify:
+    python --version
+
+### 4. Install Dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+### 5. Start Backend (FastAPI)
+chmod +x backend/run_dev.sh
+./backend/run_dev.sh
+Health check:
+http://127.0.0.1:8000/health
+
+### 6.Start Frontend (Streamlit UI)
+Open a new terminal:
+cd agentic-wealth-copilot
+source .venv/bin/activate
+streamlit run frontend/app.py
+Open in browser:
+http://localhost:8501
+
+
+## Input File name convention in Incoming & text
+To ensure accurate and reliable parsing, Agentic Wealth Copilot infers certain metadata (document type, employer, date/year) from file names. While we also extract information from the PDF content itself, following this naming convention greatly improves robustness, speed, and correctness—especially for batch ingestion.
+Paystubs:
+Format: <Employer>-Paystub-YYYY-MM-DD.pdf
+Examples: Microsoft-Paystub-2026-01-15.pdf
+
+W-2:
+Format: <Employer>-W2-YYYY.pdf
+Example: Microsoft-W2-2024.pdf
+
+
+### DEBUG
+Q:(.venv) huiminyan@huimins-MacBook-Pro agentic-wealth-copilot % ./backend/run_dev.sh
+INFO:     Will watch for changes in these directories: ['/Users/huiminyan/Documents/agentic-wealth-copilot']
+ERROR:    [Errno 48] Address already in use
+
+lsof -i:8000
+COMMAND   PID      USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+WeChat  15056 huiminyan  278u  IPv4 0xb38bdc966678b509      0t0  TCP 172.16.224.47:58617->49.51.190.94:http-alt (ESTABLISHED)
+(.venv) huiminyan@huimins-MacBook-Pro agentic-wealth-copilot % kill -9 15056
+
 
 ## Disclaimer
 

@@ -10,65 +10,57 @@ which Streamlit automatically discovers.
 from __future__ import annotations
 
 import streamlit as st
+from state import ensure_session
+from api import request_json
 
-from frontend.state import ensure_session
-from frontend.api import copilot
+def main():
+    st.set_page_config(
+        page_title="Agentic Wealth Copilot",
+        layout="wide",
+    )
 
-
-def main() -> None:
-    """Render the main chat interface and handle user input."""
-    # Set page configuration
-    st.set_page_config(page_title="Agentic Wealth Copilot", layout="wide")
     ensure_session()
 
-    st.title("Agentic Wealth Copilot")
-    st.caption(
-        "Local‑first WebUI. Paper‑only trading. Privacy‑first data handling."
-    )
+    st.title("💰 Agentic Wealth Copilot")
+    st.caption("Your lifelong, privacy-first financial copilot")
 
-    # Sidebar with session info and actions
     with st.sidebar:
-        st.subheader("Session")
-        st.code(st.session_state.session_id)
-        if st.button("Clear chat"):
-            st.session_state.messages = []
-            st.rerun()
+        st.header("Session")
+        st.write(f"Session ID: `{st.session_state.session_id}`")
+        if st.button("Reset conversation"):
+            st.session_state.chat_history = []
+            st.experimental_rerun()
 
-    # Render chat history
-    for m in st.session_state.messages:
-        with st.chat_message(m["role"]):
-            st.markdown(m["content"])
+    st.divider()
 
-    # Input box for the user to type a message
-    prompt = st.chat_input(
-        "Ask about income/taxes, net worth, investing rules…",
-        key="chat_input",
-    )
-    if prompt:
-        # Append user message to history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    # Chat history
+    for role, msg in st.session_state.chat_history:
+        with st.chat_message(role):
+            st.markdown(msg)
+
+    # Input box
+    user_input = st.chat_input("Ask me about your finances...")
+
+    if user_input:
+        st.session_state.chat_history.append(("user", user_input))
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(user_input)
 
-        # Call backend and display reply
         with st.chat_message("assistant"):
-            try:
-                resp = copilot(prompt, session_id=st.session_state.session_id)
-                reply = resp.get("reply", "")
-                trace = resp.get("trace", [])
-                st.markdown(reply)
-                # Show internal trace for debugging if available
-                if trace:
-                    with st.expander("Trace"):
-                        st.write(trace)
-            except Exception as exc:
-                st.error(f"Backend error: {exc}")
-                reply = ""
+            with st.spinner("Thinking..."):
+                try:
+                    payload = {
+                        "message": user_input,
+                        "session_id": st.session_state.session_id,
+                    }
+                    resp = request_json("POST", "/api/copilot", payload)
+                    answer = resp.get("reply", "(no response)")
+                except Exception as e:
+                    answer = f"⚠️ Error: {e}"
 
-        # Append assistant reply to history
-        st.session_state.messages.append(
-            {"role": "assistant", "content": reply}
-        )
+                st.markdown(answer)
+
+        st.session_state.chat_history.append(("assistant", answer))
 
 
 if __name__ == "__main__":
