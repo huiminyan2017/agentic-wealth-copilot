@@ -12,10 +12,11 @@ import sys
 import json
 from pathlib import Path
 
-# Add backend to path so we can import from app
-sys.path.insert(0, str(Path(__file__).parent))
+# Add repository root to path so we can import backend modules
+repo_root = Path(__file__).parent.parent
+sys.path.insert(0, str(repo_root))
 
-from app.services.paystub_parser import parse_paystub_msft_simple
+from backend.app.services.paystub_parser import parse_paystub_msft_simple
 
 
 def test_paystub_file(pdf_path: Path):
