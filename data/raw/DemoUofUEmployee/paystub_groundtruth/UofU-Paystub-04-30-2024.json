@@ -1,0 +1,54 @@
+{
+  "pay_date": "2024-04-30",
+  "employer_name": "u_of_utah",
+  "gross": {
+    "value": 3000.0,
+    "details": {
+      "base": 3000.0
+    }
+  },
+  "pretax_deductions": {
+    "value": 585.65,
+    "details": {
+      "bb_med_den_insurance": 189.5,
+      "403b_tda": 300.0,
+      "fsa_health": 96.15
+    }
+  },
+  "taxes": {
+    "value": 567.51,
+    "details": {
+      "federal": 241.44,
+      "ss": 186.0,
+      "medicare": 43.5,
+      "state": 96.57
+    }
+  },
+  "aftertax_deductions": {
+    "value": 12.65,
+    "details": {
+      "life_dep_insurance": 2.15,
+      "life_emp_insurance": 10.5
+    }
+  },
+  "net_pay": {
+    "value": 1834.19
+  },
+  "stock_pay": {
+    "value": 0,
+    "details": {}
+  },
+  "validation": {
+    "net_pay_diff": 0.0,
+    "tax_sum_diff": 0.0,
+    "pretax_sum_diff": 0.0,
+    "aftertax_sum_diff": 0.0
+  },
+  "_raw": {
+    "total_deductions": 598.3
+  },
+  "warnings": [],
+  "source_pdf": "data/raw/DemoUofUEmployee/paystub/UofU-Paystub-04-30-2024.pdf",
+  "parser": "university",
+  "_disclaimer": "SYNTHETIC DEMO DATA \u2014 Name changed for privacy. Wages based on public UofU salary data for IT Analyst II (~$78k/yr, 2024). Not a real document."
+}

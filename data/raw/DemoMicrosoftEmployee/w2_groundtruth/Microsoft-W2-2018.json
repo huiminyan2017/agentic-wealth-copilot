@@ -1,0 +1,19 @@
+{
+  "year": 2018,
+  "employer_name": "microsoft",
+  "wages": 143000.0,
+  "federal_tax_withheld": 28000.0,
+  "ss_wages": 128400.0,
+  "ss_tax_withheld": 7960.8,
+  "medicare_wages": 143000.0,
+  "medicare_tax_withheld": 2073.5,
+  "state_wages": 143000.0,
+  "state_tax_withheld": 7150.0,
+  "box12_401k_pretax": 5000.0,
+  "box12_hsa": 2000.0,
+  "box12_roth_401k": 1000.0,
+  "box12_gtl": 300.0,
+  "missing_fields": [],
+  "warnings": [],
+  "_disclaimer": "SYNTHETIC DEMO DATA \u2014 All names, wages, and financial figures are entirely fictitious and generated for testing purposes only."
+}

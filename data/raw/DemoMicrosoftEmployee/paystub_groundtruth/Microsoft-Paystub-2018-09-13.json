@@ -1,0 +1,79 @@
+{
+  "pay_date": "2018-09-13",
+  "employer_name": "microsoft",
+  "gross": {
+    "value": 6000.0,
+    "details": {
+      "base": 5950.0,
+      "stock": 0.0,
+      "perks": 50.0,
+      "bonus": 0.0,
+      "vacation_po": 0.0,
+      "shared_success_bonus": 0.0
+    }
+  },
+  "pretax_deductions": {
+    "value": -385.0,
+    "details": {
+      "401k": -192.0,
+      "hsa_ee": -77.0,
+      "fsa_dep_care": -96.0,
+      "fsa_limited_vision_dental": -20.0
+    }
+  },
+  "taxes": {
+    "value": -2027.0,
+    "details": {
+      "federal": -1290.0,
+      "ss": -372.0,
+      "medicare": -87.0,
+      "state": -278.0
+    }
+  },
+  "aftertax_deductions": {
+    "value": -389.5,
+    "details": {
+      "401k": -50.0,
+      "401k-roth": -38.0,
+      "espp": -300.0,
+      "espp_refund": 0.0,
+      "add_insurance": -1.5,
+      "life_dep_insurance": 0.0,
+      "giving_program": 0.0
+    }
+  },
+  "net_pay": {
+    "value": 3198.5
+  },
+  "stock_pay": {
+    "value": 0.0,
+    "details": {
+      "income": 0.0,
+      "tax": 0.0
+    }
+  },
+  "validation": {
+    "net_pay_diff": 0.0,
+    "tax_sum_diff": 0.0,
+    "pretax_sum_diff": 0.0,
+    "aftertax_sum_diff": 0.0
+  },
+  "ytd": {
+    "gross": 95000.0,
+    "net_pay": 51196.5,
+    "federal_tax": -19340.0,
+    "state_tax": -4376.0,
+    "ss_tax": -5890.0,
+    "medicare_tax": -1381.0
+  },
+  "_raw": {
+    "total_retirement": -280.0,
+    "total_benefits": -479.5,
+    "total_other": null,
+    "total_taxes": -2027.0
+  },
+  "warnings": [],
+  "source_pdf": "data/raw/DemoMicrosoftEmployee/paystub/Microsoft-Paystub-2018-09-13.pdf",
+  "parser": "msft",
+  "_disclaimer": "SYNTHETIC DEMO DATA \u2014 All names, wages, and financial figures are entirely fictitious and generated for testing purposes only."
+}

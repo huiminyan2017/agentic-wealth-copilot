@@ -1,0 +1,12 @@
+# macOS metadata
+.DS_Store
+
+# Ignore raw data except DemoUser and all *_groundtruth folders
+data/raw/*
+!data/raw/DemoMicrosoftEmployee
+!data/raw/DemoUofUEmployee
+data/parsed/
+data/logs/
+.env
+__pycache__/
+*.db

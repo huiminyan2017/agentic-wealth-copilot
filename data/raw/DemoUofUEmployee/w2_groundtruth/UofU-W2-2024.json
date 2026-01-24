@@ -1,0 +1,19 @@
+{
+  "year": 2024,
+  "employer_name": "u_of_utah",
+  "wages": 62773.1,
+  "federal_tax_withheld": 6277.44,
+  "ss_wages": 78000.0,
+  "ss_tax_withheld": 4836.0,
+  "medicare_wages": 78000.0,
+  "medicare_tax_withheld": 1131.0,
+  "state_wages": 62773.1,
+  "state_tax_withheld": 2510.82,
+  "box12_401k_pretax": 7800.0,
+  "box12_hsa": null,
+  "box12_roth_401k": null,
+  "box12_gtl": null,
+  "missing_fields": [],
+  "warnings": [],
+  "_disclaimer": "SYNTHETIC DEMO DATA \u2014 Name changed for privacy. Wages based on public UofU salary data for IT Analyst II (~$78k/yr, 2024). Not a real document."
+}
