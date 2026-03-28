@@ -8,7 +8,7 @@
 
 # Agentic Wealth Copilot
 
-**A privacy-first, multi-agent AI system for personal finance intelligence**
+**A privacy-first, agentic AI system for personal finance intelligence**
 
 > "Not a chatbot. An autonomous, explainable copilot designed to grow with you over decades."
 
@@ -20,13 +20,13 @@
 
 ### Why does personal finance need agents?
 
-| Pain Point | Status Quo | This Project |
-|------------|-----------|--------------|
-| Parsing pay documents | Manual entry, error-prone | Deterministic parser + arithmetic proof |
-| Understanding trends | Spreadsheets | 6-step deterministic income intelligence pipeline |
-| Investment tracking | Fragmented apps | Real-time watchlist with scheduled price alerts |
-| Asking "what if" questions | Generic chatbots | Domain-routed LangGraph agents |
-| Household finances | Per-person tools | Multi-person wealth comparison |
+|         Pain Point             |        Status Quo           |                     This Project                    |
+|--------------------------------|-----------------------------|-----------------------------------------------------|
+| Parsing pay documents          | Manual entry, error-prone   | Deterministic parser + arithmetic proof             |
+| Understanding trends           | Spreadsheets                | 6-step deterministic income intelligence pipeline   |
+| Investment tracking            | Fragmented apps             | Real-time watchlist with scheduled price alerts     |
+| Asking "what if" questions     | Generic chatbots            | Domain-routed LangGraph agents                      |
+| Household finances             | Per-person tools            | Multi-person wealth comparison                      |
 
 ---
 
@@ -35,11 +35,11 @@
 ### Five integrated modules
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│   Income & Tax   │  Wealth  │  Investing  │  Spending  │ Copilot Chat │
+┌────────────────────────────────────────────────────────────────────────┐
+│   Income & Tax   │  Wealth   │  Investing  │  Spending  │ Copilot Chat │
 │  parse W-2/stub  │ net worth │  watchlist  │  receipts  │ LangGraph    │
-│  trend analysis  │ targets   │  alerts     │  analytics │ multi-agent  │
-└─────────────────────────────────────────────────────────────┘
+│  trend analysis  │ targets   │  alerts     │  analytics │  agentic     │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 All modules: **local-first, privacy-preserving, LLM-optional**
@@ -52,13 +52,13 @@ _Screenshot: `01_income_document_ingestion.png`_
 
 ```
 ┌──────────────────────────────────────────┐
-│          Streamlit Frontend               │
+│          Streamlit Frontend              │
 │   5 pages + person selector              │
 └──────────────────┬───────────────────────┘
                    │ HTTP / REST
                    ▼
 ┌──────────────────────────────────────────┐
-│            FastAPI Backend                │
+│            FastAPI Backend               │
 ├──────────────────────────────────────────┤
 │  /api/copilot ──► LangGraph Orchestrator │
 │  /api/income  ──► PDF Parser + Trends    │
@@ -86,12 +86,12 @@ _Screenshots: `04_income_paystub_validation.png` · `05_parsed_json_schema.png` 
 
 ### Why not use LLM/OCR for parsing?
 
-| Dimension | Deterministic | AI |
-|-----------|---------------|----|
-| Correctness | Invariant-proven | Probabilistic |
-| Auditability | Full trace | Black box |
-| Cost | Free | Per-document |
-| Testability | Easy unit tests | Hard to pin |
+| Dimension     | Deterministic    | AI            |
+|---------------|------------------|---------------|
+| Correctness   | Invariant-proven | Probabilistic |
+| Auditability  | Full trace       | Black box     |
+| Cost          | Free             | Per-document  |
+| Testability   | Easy unit tests  | Hard to pin   |
 
 > **Rule:** LLM touches only the final synthesis layer, never raw extraction.
 
@@ -230,19 +230,19 @@ Finance is rarely solo. Shared property ownership, multi-person comparison, and 
 
 ## Slide 12 — Tech Stack
 
-| Layer | Tools |
-|-------|-------|
-| **Agent orchestration** | LangGraph 0.2+, langchain-core |
-| **LLM** | Azure OpenAI (`gpt-4o-mini`) |
-| **Backend** | FastAPI, Uvicorn, Pydantic v2 |
-| **Frontend** | Streamlit, Plotly |
-| **PDF parsing** | pdfplumber, pdf2image |
-| **OCR** | Azure Document Intelligence |
-| **Market data** | yfinance (quotes: 60s cache · history: 5min cache) |
-| **Scheduling** | APScheduler (background, market-hours gated) |
-| **Email** | SMTP stdlib |
-| **Testing** | pytest |
-| **PDF generation** | reportlab (test data only) |
+| Layer                     | Tools                                              |
+|---------------------------|----------------------------------------------------|
+| **Agent orchestration**   | LangGraph 0.2+, langchain-core                     |
+| **LLM**                   | Azure OpenAI (`gpt-4o-mini`)                       |
+| **Backend**               | FastAPI, Uvicorn, Pydantic v2                      |
+| **Frontend**              | Streamlit, Plotly                                  |
+| **PDF parsing**           | pdfplumber, pdf2image                              |
+| **OCR**                   | Azure Document Intelligence                        |
+| **Market data**           | yfinance (quotes: 60s cache · history: 5min cache) |
+| **Scheduling**            | APScheduler (background, market-hours gated)       |
+| **Email**                 | SMTP stdlib                                        |
+| **Testing**               | pytest                                             |
+| **PDF generation**        | reportlab (test data only)                         |
 
 All Python, all open source except Azure services.
 
@@ -270,15 +270,15 @@ paystub and W-2 schemas that work identically across employers._
 
 ## Slide 14 — Notable Achievements
 
-| Achievement | How |
-|-------------|-----|
-| Zero-hallucination parsing | Arithmetic invariants on every paystub; validated on 130+ real paystubs + 5 yrs W-2s |
-| Household-aware net worth | Ownership fraction per asset in wealth model |
-| Real-time alerts without infra | APScheduler + market-hours gate + 24h cooldown |
-| Lightweight income pipeline | 6-step pure Python, mtime-keyed result cache |
-| Graceful LLM degradation | Deterministic fallback in every node |
-| Idempotent ingestion | SHA-256 hash dedup on document parse |
-| Full audit trail | Agent trace logged per conversation turn |
+| Achievement                    | How                                                                          |
+|--------------------------------|------------------------------------------------------------------------------|
+| Zero-hallucination parsing     | Arithmetic invariants on every paystub; 130+ real paystubs + 5 yrs W-2s      |
+| Household-aware net worth      | Ownership fraction per asset in wealth model                                 |
+| Real-time alerts without infra | APScheduler + market-hours gate + 24h cooldown                               |
+| Lightweight income pipeline    | 6-step pure Python, mtime-keyed result cache                                 |
+| Graceful LLM degradation       | Deterministic fallback in every node                                         |
+| Idempotent ingestion           | SHA-256 hash dedup on document parse                                         |
+| Full audit trail               | Agent trace logged per conversation turn                                     |
 
 ---
 
