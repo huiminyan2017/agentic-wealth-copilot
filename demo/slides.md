@@ -106,8 +106,10 @@ load_data → compute_trends → detect_anomalies
     → generate_insights → propose_actions → compile_report
 ```
 
-Pure Python — no LangGraph overhead. The `income_tax` node calls `run_income_analysis()` and
-passes the structured report to the LLM for narration.
+Pure Python — no LLM involved. Called from **two places in the UI**:
+
+- **Income & Tax page** — "Analyze My Income & Taxes" button triggers it directly via `POST /api/income/analyze`
+- **Copilot chat** — asking an income question routes to `income_tax_node`, which calls the same pipeline and passes the report to the LLM for narration
 
 **Result cache:** keyed on `(person, file-mtimes)` — re-uploading a document auto-busts the cache.
 
@@ -120,7 +122,69 @@ _Screenshot: `08_income_ai_insights.png`_
 
 ---
 
-## Slide 7 — The Agent System (LangGraph)
+## Slide 7 — Wealth & Planning
+
+### Multi-person net worth, done right
+
+```
+Total Wealth  = Cash + Primary Property + Investment Properties + Stocks + 401(k)
+Liquid Wealth = Cash + Stocks + Investment Properties  (excludes home + 401k)
+```
+
+**Shared property handled correctly:**
+- Two people can co-own an asset at any ownership split
+- Each person's `wealth.json` records the ownership fraction; net worth = `value × fraction`
+
+**Copilot integration:**
+> "What is my net worth compared to [other person]?"
+→ routing node routes to `wealth_node` → loads both JSONs → returns comparison table
+
+_Screenshots: `11_wealth_asset_form.png` · `12_wealth_summary.png`_
+
+---
+
+## Slide 8 — Investing & Trading
+
+### Real-time watchlist with scheduled price alerts
+
+**Watchlist:**
+- Per-person, stored in `data/parsed/<person>/watchlist.json`
+- Preset categories: Tech, Consumer, EV/AI, Finance, Index ETFs
+- Live quotes: price, Δ%, day range, 52W range, market cap, P/E, div yield
+
+**Candlestick charts:** Plotly OHLCV with volume, periods 1W – 5Y
+
+**Price Alerts:**
+- Alert rule: `{ticker, direction, threshold_pct, time_range, email}`
+- APScheduler runs every 2 hours, gated to market hours (9:30–16:00 ET, Mon–Fri)
+- 24-hour cooldown after trigger; graceful fallback if SMTP not configured
+
+_Screenshots: `13_investing_watchlist.png` · `15_investing_index_education.png`_
+
+---
+
+## Slide 9 — Spending Module
+
+### Smart ingestion with duplicate prevention
+
+**Receipt parsing:**
+```
+Upload image/PDF → Azure Document Intelligence → line items preview
+    → Human review → deterministic ID = hash(date, amount, merchant)
+    → Idempotent save (duplicate blocked automatically)
+```
+
+**Recurring spending:**
+- Supports daily / weekly / biweekly / monthly / quarterly / yearly
+- Auto-normalizes to monthly total regardless of frequency
+
+**Analytics:** category breakdown, merchant frequency, one-time vs. recurring trends
+
+_Screenshots: `09_spending_transactions.png` · `10_spending_analytics.png`_
+
+---
+
+## Slide 10 — The Agent System (LangGraph)
 
 ### Main graph routing
 
@@ -145,67 +209,7 @@ User message
 - Deterministic pipeline for complex analysis (income = 6-step pure Python)
 - Full keyword fallback when LLM unavailable — app works without credentials
 
----
-
-## Slide 8 — Wealth & Planning
-
-### Multi-person net worth, done right
-
-```
-Total Wealth  = Cash + Primary Property + Investment Properties + Stocks + 401(k)
-Liquid Wealth = Cash + Stocks + Investment Properties  (excludes home + 401k)
-```
-
-**Shared property handled correctly:**
-- Two people can co-own an asset at any ownership split
-- Each person's `wealth.json` records the ownership fraction; net worth = `value × fraction`
-
-**Copilot integration:**
-> "What is my net worth compared to [other person]?"
-→ routing node routes to `wealth_node` → loads both JSONs → returns comparison table
-
-_Screenshots: `11_wealth_asset_form.png` · `12_wealth_summary.png`_
-
----
-
-## Slide 9 — Investing & Trading
-
-### Real-time watchlist with scheduled price alerts
-
-**Watchlist:**
-- Per-person, stored in `data/parsed/<person>/watchlist.json`
-- Preset categories: Tech, Consumer, EV/AI, Finance, Index ETFs
-- Live quotes: price, Δ%, day range, 52W range, market cap, P/E, div yield
-
-**Candlestick charts:** Plotly OHLCV with volume, periods 1W – 5Y
-
-**Price Alerts:**
-- Alert rule: `{ticker, direction, threshold_pct, time_range, email}`
-- APScheduler runs every 2 hours, gated to market hours (9:30–16:00 ET, Mon–Fri)
-- 24-hour cooldown after trigger; graceful fallback if SMTP not configured
-
-_Screenshots: `13_investing_watchlist.png` · `15_investing_index_education.png`_
-
----
-
-## Slide 10 — Spending Module
-
-### Smart ingestion with duplicate prevention
-
-**Receipt parsing:**
-```
-Upload image/PDF → Azure Document Intelligence → line items preview
-    → Human review → deterministic ID = hash(date, amount, merchant)
-    → Idempotent save (duplicate blocked automatically)
-```
-
-**Recurring spending:**
-- Supports daily / weekly / biweekly / monthly / quarterly / yearly
-- Auto-normalizes to monthly total regardless of frequency
-
-**Analytics:** category breakdown, merchant frequency, one-time vs. recurring trends
-
-_Screenshots: `09_spending_transactions.png` · `10_spending_analytics.png`_
+_Screenshot: `16_copilot_chat.png`_
 
 ---
 
