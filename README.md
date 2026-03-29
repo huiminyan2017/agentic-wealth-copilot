@@ -1,30 +1,101 @@
 # Agentic Wealth Copilot
 
-A lifelong, privacy-preserving, multi-agent AI system designed to help individuals and families understand, track, and optimize their finances.
+A privacy-first, agentic AI system for personal finance intelligence — income analysis, wealth tracking, investing, and spending, unified under a natural-language copilot.
 
-This is **not** a chatbot. It is an autonomous, modular, explainable financial copilot built on LangGraph + FastAPI + Streamlit.
-
----
-
-## Core Principles
-
-1. **Privacy-first** — All personal data stays local; sensitive documents are never committed to version control
-2. **Explainable** — Every recommendation has plain-English justification
-3. **Agentic** — Multi-agent planning and memory, not single-turn LLM calls
-4. **Long-lived** — Designed to evolve over decades with a modular architecture
-5. **Auditable** — Decisions, reasoning, and traces are logged for replay and review
+> Not a chatbot. An autonomous, explainable copilot built on LangGraph + FastAPI + Streamlit.
 
 ---
 
-## What It Can Do Today
+## Modules
 
-| Module | Status | Description |
-|---|---|---|
-| Income & Tax | ✅ | Parse W-2/paystub PDFs, compute trends, detect anomalies, LLM-driven Q&A |
-| Wealth & Planning | ✅ | Track net worth across cash, property, stocks, retirement; set targets |
-| Investing & Trading | ✅ | Stock watchlist, real-time quotes, candlestick charts, price alerts + email |
-| Spending | ✅ | Log one-time and recurring expenses, parse receipts via Azure OCR |
-| Copilot Chat | ✅ | Natural language interface over all modules, routed by LangGraph agents |
+| Module | Description |
+|--------|-------------|
+| **Income & Tax** | Parse W-2/paystub PDFs, arithmetic validation, trend analysis, LLM-driven Q&A |
+| **Wealth & Planning** | Net worth across cash, property, stocks, retirement; fractional co-ownership; targets |
+| **Investing & Trading** | Per-person watchlist, live quotes, Plotly candlestick charts, scheduled price alerts |
+| **Spending** | One-time and recurring expenses, receipt OCR via Azure Document Intelligence |
+| **Copilot Chat** | Natural language interface over all modules, routed by a LangGraph agent graph |
+
+All modules are **local-first, LLM-optional** — the app runs fully without Azure OpenAI credentials.
+
+---
+
+## Architecture
+
+```
+Streamlit frontend  ──HTTP──►  FastAPI backend  ──►  data/parsed/<Person>/*.json
+                                     │
+                               LangGraph agents
+                         routing → domain node → critic
+```
+
+- **Parsing** is fully deterministic (regex + arithmetic invariants) — validated on 130+ real paystubs and 5+ years of W-2s. See [docs/income_tax.md](docs/income_tax.md).
+- **Agent routing** classifies intent via LLM with keyword fallback. See [docs/agents.md](docs/agents.md).
+- **Income analysis** is a 6-step pure Python pipeline (no LLM) with mtime-keyed result cache.
+- **All personal data** stays under `data/` — `.gitignored`, never committed.
+
+---
+
+## Quick Start
+
+**Requirements:** Python 3.10+, poppler (`brew install poppler` on macOS)
+
+```bash
+# 1. Set up environment
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Configure
+cp .env-example .env
+# Edit .env — set AZURE_OPENAI_* for LLM features (optional)
+
+# 3. Start backend  (terminal 1)
+./backend/run_dev.sh
+
+# 4. Start frontend  (terminal 2)
+source .venv/bin/activate
+streamlit run frontend/app.py
+```
+
+Open **http://localhost:8501** · Health check: `curl http://127.0.0.1:8000/health`
+
+---
+
+## Configuration
+
+| Variable group | Required for |
+|----------------|-------------|
+| `AZURE_OPENAI_*` | LLM responses in copilot, insights, analysis narration |
+| `SMTP_*` | Stock price alert emails |
+| `AZURE_DOC_INTELLIGENCE_*` | Receipt OCR in Spending module |
+
+Without Azure OpenAI, every agent node falls back to deterministic output automatically.
+See [docs/agents.md — Azure OpenAI Setup](docs/agents.md#azure-openai-setup) for step-by-step instructions.
+
+---
+
+## Usage
+
+### Income & Tax
+1. Place PDFs in `data/raw/<Person>/paystub/` or `.../w2/` using the naming convention:
+   `<Employer>-Paystub-YYYY-MM-DD.pdf` / `<Employer>-W2-YYYY.pdf`
+2. **Scan → Ingest** on the Income & Tax page to parse them
+3. View trends or click **Analyze My Income & Taxes** for AI-generated insights and actions
+
+### Wealth & Planning
+- Enter balances for cash, property, stocks, retirement; set savings targets
+- Copilot: *"What is my net worth?"* or *"Compare net worth across people"*
+
+### Investing & Trading
+- Add tickers to your watchlist; view live quotes and candlestick charts
+- Set price alerts with direction, threshold %, and email — fires during market hours only
+
+### Spending
+- Log one-time or recurring transactions; upload a receipt image for OCR parsing
+- View category breakdowns and monthly trends
+
+### Copilot Chat
+Ask anything in natural language — *"What are my tax optimization opportunities?"*, *"How did my income change year over year?"*, *"What's my liquid net worth?"*
 
 ---
 
@@ -32,160 +103,48 @@ This is **not** a chatbot. It is an autonomous, modular, explainable financial c
 
 ```
 agentic-wealth-copilot/
-│
-├── backend/                  # FastAPI server
-│   └── app/
-│       ├── main.py           # App factory, lifespan (starts scheduler)
-│       ├── settings.py       # Pydantic settings (env vars)
-│       ├── schemas.py        # Pydantic data models
-│       ├── routes/           # API endpoints (income, spending, stocks, alerts, copilot)
-│       └── services/         # Business logic (parsers, stock service, alert service, scheduler)
-│
-├── agents/                   # LangGraph multi-agent orchestration
-│   ├── graph.py              # Main graph: planner → domain node → critic → END
-│   ├── state.py              # CopilotState dataclass
-│   ├── llm.py                # Azure OpenAI client (lazy init, graceful fallback)
-│   ├── nodes/                # planner, income_tax, wealth, investing, general, critic
-│   ├── subagents/            # income_intelligence (6-step analysis sub-graph)
-│   └── tools/                # income_tools (load, trend, anomaly, insight, action)
-│
-├── frontend/                 # Streamlit UI
-│   ├── app.py                # Chat interface (main page)
-│   ├── api.py                # HTTP client wrapper for backend
-│   ├── state.py              # Session state helpers
-│   └── pages/
-│       ├── 1_Income_&_Tax.py
-│       ├── 2_Wealth_&_Planning.py
-│       ├── 3_Investing_&_Trading.py
-│       └── 4_Spending.py
-│
-├── docs/                     # Module-specific documentation
-│   ├── agents.md             # Agent status and capabilities
-│   ├── langgraph_architecture.md
-│   ├── income_tax.md         # Schemas, validation, CLI tools
-│   ├── design-on-doc-parsing.md
-│   ├── wealth_tracking.md
-│   ├── investing_trading.md  # Watchlist, quotes, alerts, scheduler
-│   ├── spending.md           # Spending CRUD and receipt parsing
-│   ├── stock_alerts.md       # Price alert rules, email, scheduling
-│   └── decisions-on-tradeoffs.md
-│
-├── scripts/                  # CLI utilities
-│   ├── generate_test_paystubs.py
-│   ├── generate_test_w2.py
-│   ├── income_ingest_tool.py
-│   └── income_groundtruth_tool.py
-│
-├── tests/                    # pytest test suite
-├── data/
-│   ├── raw/<Person>/         # Original PDFs (not committed)
-│   └── parsed/<Person>/      # Extracted JSON (not committed)
-│
+├── backend/app/
+│   ├── main.py              # FastAPI + APScheduler lifespan
+│   ├── routes/              # income, spending, stocks, alerts, copilot
+│   └── services/            # paystub_parser, w2_parser, stock_service, alert_service
+├── agents/
+│   ├── graph.py             # LangGraph graph (compile-once, invoke-per-request)
+│   ├── llm.py               # Azure OpenAI wrapper (lazy init, fallback-safe)
+│   ├── state.py             # CopilotState dataclass
+│   ├── income_analysis.py   # 6-step deterministic pipeline + mtime cache
+│   └── nodes/               # routing, income_tax, wealth, investing, general_questions, critic
+├── frontend/
+│   ├── app.py               # Streamlit root (Copilot Chat)
+│   ├── state.py             # ensure_session() — centralised session state
+│   └── pages/               # 1_Income_&_Tax, 2_Wealth_&_Planning, 3_Investing_&_Trading, 4_Spending
+├── scripts/
+│   ├── generate_demo_user_paystub_w2.py   # Regenerate synthetic demo PDFs + groundtruth
+│   ├── income_ingest_tool.py              # CLI bulk ingestion
+│   ├── income_groundtruth_tool.py         # CLI groundtruth check / save
+│   └── generate_json_schema_screenshot.py # Regenerate demo/screenshots/05-06
+├── tests/                   # pytest — paystub + W-2 ingest & parse, income trends/scan
+├── data/raw/<Person>/       # Original PDFs (.gitignored)
+├── data/parsed/<Person>/    # Parsed JSON (.gitignored)
+├── demo/                    # Screenshots + slide deck
+├── docs/                    # Design and API docs (see below)
 ├── requirements.txt
-├── .env-example              # Configuration template
-└── CLAUDE.md                 # Development rules for AI assistants
+└── .env-example
 ```
-
----
-
-## Quick Start
-
-**Requirements:** Python 3.10+, poppler
-
-```bash
-# macOS
-brew install python poppler
-
-# 1. Create virtual environment
-cd agentic-wealth-copilot
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# 2. Configure environment
-cp .env-example .env
-# Edit .env — at minimum set AZURE_OPENAI_* if you want LLM features
-
-# 3. Start backend
-./backend/run_dev.sh
-# or: python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
-
-# 4. Start frontend (new terminal)
-source .venv/bin/activate
-streamlit run frontend/app.py
-```
-
-Open **http://localhost:8501**
-
-Health check: `curl http://127.0.0.1:8000/health`
-
----
-
-## Using the App
-
-### Income & Tax
-1. Go to the **Income & Tax** page
-2. Select or create a person
-3. Place PDFs in `data/raw/<Person>/paystub/` or `data/raw/<Person>/w2/` using the naming convention:
-   - `<Employer>-Paystub-YYYY-MM-DD.pdf`
-   - `<Employer>-W2-YYYY.pdf`
-4. Click **Scan** to detect documents, then **Ingest** to parse them
-5. View trends and run AI analysis
-
-### Wealth & Planning
-1. Go to the **Wealth & Planning** page
-2. Enter current balances for cash, property, stocks, retirement
-3. Set savings targets
-4. Use the **Copilot** chat to compare net worth across people
-
-### Investing & Trading
-1. Go to the **Investing & Trading** page
-2. Add stocks to your watchlist (presets or custom tickers)
-3. View real-time quotes and candlestick charts
-4. Set price alerts: pick a stock, direction (up/down/both), threshold %, time range, and email
-5. Configure SMTP in `.env` to receive email notifications
-
-### Spending
-1. Go to the **Spending** page
-2. Log one-time transactions manually or upload a receipt image
-3. Add recurring expenses with frequency
-4. View category breakdowns and detect duplicates
-
-### Copilot Chat
-- Ask anything in natural language: *"How did my income change this year?"*, *"Compare my net worth with Bao"*, *"What's my effective tax rate?"*
-- The planner agent routes to the right domain node, which runs analysis and generates an LLM-synthesized reply
-
----
-
-## Configuration
-
-Copy `.env-example` to `.env` and fill in values. Key sections:
-
-| Section | Required for |
-|---|---|
-| `AZURE_OPENAI_*` | LLM-powered responses (copilot, insights, analysis) |
-| `SMTP_*` | Stock price alert emails |
-| `AZURE_DOC_INTELLIGENCE_*` | Receipt OCR parsing |
-
-All features degrade gracefully — without Azure OpenAI, agents fall back to deterministic data output.
 
 ---
 
 ## Testing
 
 ```bash
-# All tests
-python -m pytest tests/ -v
+# Full suite
+.venv/bin/python -m pytest tests/ -v
 
-# Specific modules
-python -m pytest tests/test_paystub_parser.py -v
-python -m pytest tests/test_w2_parser.py -v
-```
+# Income parser only
+.venv/bin/python -m pytest "tests/test_paystub_ingest_&_parse.py" "tests/test_w2_ingest_&_parse.py" -v
 
-Generate demo data for testing:
-```bash
-python scripts/generate_test_paystubs.py
-python scripts/generate_test_w2.py
+# Regenerate demo data then confirm tests pass
+.venv/bin/python scripts/generate_demo_user_paystub_w2.py
+.venv/bin/python -m pytest "tests/test_paystub_ingest_&_parse.py" "tests/test_w2_ingest_&_parse.py" -v
 ```
 
 ---
@@ -193,20 +152,18 @@ python scripts/generate_test_w2.py
 ## Documentation
 
 | Doc | Contents |
-|---|---|
-| [docs/agents.md](docs/agents.md) | Agent status, capabilities, graph topology |
-| [docs/langgraph_architecture.md](docs/langgraph_architecture.md) | Detailed call flow diagrams |
-| [docs/income_tax.md](docs/income_tax.md) | Schemas, validation invariants, CLI tools |
-| [docs/design-on-doc-parsing.md](docs/design-on-doc-parsing.md) | Why deterministic parsing over AI OCR |
-| [docs/wealth_tracking.md](docs/wealth_tracking.md) | Wealth data model and ownership logic |
-| [docs/investing_trading.md](docs/investing_trading.md) | Watchlist, quotes, alerts |
-| [docs/spending.md](docs/spending.md) | Spending CRUD and receipt parsing |
-| [docs/stock_alerts.md](docs/stock_alerts.md) | Alert rules, email, scheduler |
+|-----|----------|
+| [docs/agents.md](docs/agents.md) | Agent graph, node details, LLM call specs, Azure OpenAI setup |
+| [docs/income_tax.md](docs/income_tax.md) | Schemas, validation invariants, pipeline steps, CLI tools |
+| [docs/wealth_tracking.md](docs/wealth_tracking.md) | Wealth data model and fractional ownership logic |
+| [docs/investing_trading.md](docs/investing_trading.md) | Watchlist, live quotes, candlestick charts |
+| [docs/stock_alerts.md](docs/stock_alerts.md) | Alert rules, APScheduler, email, market-hours gate |
+| [docs/spending.md](docs/spending.md) | Spending CRUD, receipt OCR, deduplication |
+| [docs/design-on-doc-parsing.md](docs/design-on-doc-parsing.md) | Why deterministic parsing over AI/OCR |
 | [docs/decisions-on-tradeoffs.md](docs/decisions-on-tradeoffs.md) | Architectural decision records |
-| [docs/azure_openai_setup.md](docs/azure_openai_setup.md) | How to create/recreate the Azure OpenAI resource |
 
 ---
 
 ## Disclaimer
 
-This project is for educational, simulation, and personal planning purposes only. It does **not** execute real trades or provide professional financial, legal, or tax advice. Always consult a certified professional before making financial decisions.
+For educational and personal planning purposes only. Does not execute real trades or provide professional financial, legal, or tax advice. Consult a certified professional before making financial decisions.

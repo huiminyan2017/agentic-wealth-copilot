@@ -210,7 +210,7 @@ class TestIngestionPipeline:
         for field in ["year", "employer_name", "wages", "federal_tax_withheld"]:
             assert field in data, f"Missing field in parsed JSON: {field}"
 
-        index_path = pdir / "index.json"
+        index_path = pdir / "income_file_index.json"
         assert index_path.exists()
         with open(index_path) as f:
             index = json.load(f)
